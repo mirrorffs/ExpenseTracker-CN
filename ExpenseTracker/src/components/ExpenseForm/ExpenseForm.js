@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import styles from "./ExpenseForm.module.css";
 
-const ExpenseForm =  ({
+const ExpenseForm = ({
   addExpense,
   expenseToUpdate,
   updateExpense,
@@ -10,15 +10,11 @@ const ExpenseForm =  ({
   const expenseTextInput = useRef();
   const expenseAmountInput = useRef();
 
-  // Use the useEffect hook here, to check if an expense is to be updated
-  useEffect(()=>{
-    if(expenseToUpdate){
-      expenseTextInput.current.value=expenseToUpdate.text
-      expenseAmountInput.current.value=expenseToUpdate.amount
-    }
-  },[expenseToUpdate])
-
-  // If yes, the autofill the form values with the text and amount of the expense
+  useEffect(() => {
+    if (!expenseToUpdate) return;
+    expenseTextInput.current.value = expenseToUpdate.text;
+    expenseAmountInput.current.value = expenseToUpdate.amount;
+  }, [expenseToUpdate]);
 
   const onSubmitHandler = (e) => {
     e.preventDefault();
@@ -27,27 +23,26 @@ const ExpenseForm =  ({
     if (parseInt(expenseAmount) === 0) {
       return;
     }
-
-    const expense = {
-      text: expenseText,
-      amount: expenseAmount, 
-      id: expenseToUpdate? expenseToUpdate.id : new Date().getTime()
-    };
-
-    if(expenseToUpdate){
-      updateExpense(expense)
-      clearInput();
-      resetExpenseToUpdate();
-      return;
-    }else{
+    if (!expenseToUpdate) {
+      const expense = {
+        text: expenseText,
+        amount: expenseAmount
+      };
       addExpense(expense);
       clearInput();
       return;
     }
 
-    
+    const expense = {
+      text: expenseText,
+      amount: expenseAmount,
+      id: expenseToUpdate.id
+    };
 
-    // Logic to update expense here
+    const result = updateExpense(expense);
+    if (!result) return;
+    clearInput();
+    resetExpenseToUpdate();
   };
 
   const clearInput = () => {
@@ -57,8 +52,7 @@ const ExpenseForm =  ({
 
   return (
     <form className={styles.form} onSubmit={onSubmitHandler}>
-      
-      <h3>{expenseToUpdate?'Edit ':'Add '}transaction</h3>
+      <h3>{expenseToUpdate ? "Edit " : "Add new "}transaction</h3>
       <label htmlFor="expenseText">Text</label>
       <input
         id="expenseText"
@@ -81,7 +75,6 @@ const ExpenseForm =  ({
         required
       />
       <button className={styles.submitBtn}>
-        {/* Change text to Edit Transaction if an expense is to be updated */}
         {expenseToUpdate ? "Edit " : "Add "} Transaction
       </button>
     </form>
